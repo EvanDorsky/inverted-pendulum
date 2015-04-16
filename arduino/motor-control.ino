@@ -53,7 +53,7 @@ void loop() {
   //===== READING THE ENCODER ======
   // from http://playground.arduino.cc/Main/RotaryEncoders#Example1
   // doesn't use interrupts
-  if(micros() - encoderTimer > 1000000/ENCODER_FREQ)
+  if(micros() - encoderTimer > 1000000UL/ENCODER_FREQ)
   {
 	  encoderTimer = micros();
 	  n = digitalRead(A);
@@ -67,7 +67,7 @@ void loop() {
 	   encoderLast = n;
    }
 
-	if(millis() - velocityTimer > 1000/VELOCITY_FREQ)
+	if(millis() - velocityTimer > 1000UL/VELOCITY_FREQ)
 	{
 	  velocityTimer = millis();
 	  //in clicks per millisecond?
