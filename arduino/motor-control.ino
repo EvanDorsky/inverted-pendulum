@@ -57,7 +57,7 @@ void loop() {
     encoderTimer = micros();
     n = digitalRead(A);
     if ((encoderLast == LOW) && (n == HIGH))
-      encoderPos = digitalRead(B) == LOW? encoderPos-1 : encoderPos+1
+      encoderPos = digitalRead(B) == LOW? encoderPos-1 : encoderPos+1;
 
     encoderLast = n;
   }
