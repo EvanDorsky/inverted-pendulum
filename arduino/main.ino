@@ -1,21 +1,42 @@
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_PWMServoDriver.h"
+#include <digitalWriteFast.h>
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
-
 Adafruit_DCMotor *motor = AFMS.getMotor(1);
 
 int pot = A1;
 int A = 2;
 int B = 3;
-static unsigned long switchtime = 0;
+
+int pos = 0;
 
 void setup() {
   Serial.begin(9600);
   Serial.println("DC Motor test");
 
   AFMS.begin();
+
+  attachInterrupt(A, Arising, RISING);
+  attachInterrupt(A, Afalling, FALLING);
+}
+
+volatile unsigned long starttime = 0;
+volatile unsigned long pulsetime = 0;
+volatile bool dir = FALSE;
+volatile int pos = 0;
+
+void Arising() {
+  starttime = micros();
+
+  dir = digitalReadFast(B) == LOW? TRUE : FALSE;
+}
+
+void Afalling() {
+  pulsetime = micros() - starttime;
+
+  pos = dir? pos+1 : pos-1;
 }
 
 int dir = FORWARD;
