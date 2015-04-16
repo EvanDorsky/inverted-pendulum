@@ -53,27 +53,21 @@ void loop() {
   //===== READING THE ENCODER ======
   // from http://playground.arduino.cc/Main/RotaryEncoders#Example1
   // doesn't use interrupts
-  if(micros() - encoderTimer > 1000000UL/ENCODER_FREQ)
-  {
-	  encoderTimer = micros();
-	  n = digitalRead(A);
-	   if ((encoderLast == LOW) && (n == HIGH)) {
-	     if (digitalRead(B) == LOW) {
-	       encoderPos--;
-	     } else {
-	       encoderPos++;
-	     }
-	   } 
-	   encoderLast = n;
-   }
+  if(micros() - encoderTimer > 1000000UL/ENCODER_FREQ) {
+    encoderTimer = micros();
+    n = digitalRead(A);
+    if ((encoderLast == LOW) && (n == HIGH))
+      encoderPos = digitalRead(B) == LOW? encoderPos-1 : encoderPos+1
 
-	if(millis() - velocityTimer > 1000UL/VELOCITY_FREQ)
-	{
-	  velocityTimer = millis();
-	  //in clicks per millisecond?
-	  velocity = (n - nLast)*VELOCITY_FREQ;
-	  nLast = n;
-    }
+    encoderLast = n;
+  }
+
+  if(millis() - velocityTimer > 1000UL/VELOCITY_FREQ) {
+    velocityTimer = millis();
+    //in clicks per millisecond?
+    velocity = (n - nLast)*VELOCITY_FREQ;
+    nLast = n;
+  }
 
   // Serial.println(millis()); // time when measurement started
   // Serial.println(pulseIn(A, HIGH)); // high pulse length
