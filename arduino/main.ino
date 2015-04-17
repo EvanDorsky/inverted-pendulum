@@ -9,20 +9,15 @@ int pot = A1;
 int A = 2;
 int B = 3;
 
-volatile unsigned long starttime = 0;
+volatile unsigned long lasttime = 0;
 volatile unsigned long curtime = 0;
 volatile unsigned long pulsetime = 0;
+
 volatile int motordir = 0;
 volatile int pos = 0;
 
-void Arising() {
-  curtime = micros();
-  if (curtime > starttime)
-    pulsetime = curtime - starttime;
-
-  starttime = curtime;
-
-  if (digitalRead(B) == LOW) {
+void Aevent() {
+  if (digitalRead(B)) {
     motordir = -1;
     pos--;
   } else {
@@ -31,13 +26,22 @@ void Arising() {
   }
 }
 
+void Bevent() {
+  curtime = micros();
+  if (curtime > lasttime)
+    pulsetime = curtime - lasttime;
+
+  lasttime = curtime;
+}
+
 void setup() {
   Serial.begin(9600);
   Serial.println("DC Motor test");
 
   AFMS.begin();
 
-  attachInterrupt(A, Arising, RISING);
+  attachInterrupt(A, Aevent, RISING);
+  attachInterrupt(B, Bevent, CHANGE);
 }
 
 int dir = FORWARD;
@@ -55,7 +59,7 @@ void loop() {
   // motor->setSpeed(255);
   // motor->run(dir);
 
-  mvel = motordir*1.0/((float)(pulsetime*16e-6));
+  mvel = motordir*1.0/((float)(pulsetime*32e-6));
   Serial.print("pos: ");
   Serial.print(pos);
   Serial.print(" vel: ");
