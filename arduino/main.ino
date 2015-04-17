@@ -52,8 +52,8 @@ int mspeed = 0; // set speed
 float mvel = 0;// measure velocity
 
 void loop() {
-  error = setpos - analogRead(pot);
-  dir = (error > 0)? FORWARD : BACKWARD;
+  // error = setpos - analogRead(pot);
+  // dir = (error > 0)? FORWARD : BACKWARD;
   // mspeed = abs((float)error/maxpos*255);
 
   // motor->setSpeed(255);
