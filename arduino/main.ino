@@ -34,6 +34,16 @@ void Bevent() {
   lasttime = curtime;
 }
 
+int dir = BACKWARD;
+int error = 0;
+static int setpos = 323; // with default 5V ADC reference
+static int maxpos = 675;
+int mspeed = 0; // set speed
+float mvel = 0;// measure velocity
+
+static unsigned long lspeedtime = 0;
+static unsigned long curspeedtime = 0;
+
 void setup() {
   Serial.begin(9600);
   Serial.println("DC Motor test");
@@ -42,26 +52,29 @@ void setup() {
 
   attachInterrupt(A, Aevent, RISING);
   attachInterrupt(B, Bevent, CHANGE);
+  motor->run(dir);
 }
 
-int dir = FORWARD;
-int error = 0;
-static int setpos = 323; // with default 5V ADC reference
-static int maxpos = 675;
-int mspeed = 0; // set speed
-float mvel = 0;// measure velocity
-
 void loop() {
-  // error = setpos - analogRead(pot);
-  // dir = (error > 0)? FORWARD : BACKWARD;
-  // mspeed = abs((float)error/maxpos*255);
+  // curspeedtime = micros();
+  // if (curspeedtime - lspeedtime > 4e3) {
+  //   mspeed += 42;
 
-  // motor->setSpeed(255);
-  // motor->run(dir);
+  //   lspeedtime = curspeedtime;
+  //   motor->setSpeed(mspeed);
+  //   if (mspeed > 210)
+  //     dir = dir == FORWARD? BACKWARD : FORWARD;
 
-  mvel = motordir*1.0/((float)(pulsetime*32e-6));
-  Serial.print("pos: ");
-  Serial.print(pos);
+  //   motor->run(dir);
+  //   Serial.print("Speed: ");
+  //   Serial.print(mspeed);
+  //   Serial.println("======================");
+  // }
+
+  // mvel = motordir*1.0/((float)(pulsetime*32e-6));
+
+  // Serial.print("pos: ");
+  // Serial.print(pos);
   Serial.print(" vel: ");
-  Serial.println(mvel);
+  Serial.println(pulsetime);
 }
