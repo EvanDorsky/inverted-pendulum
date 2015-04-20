@@ -50,31 +50,30 @@ void setup() {
 
   AFMS.begin();
 
-  attachInterrupt(A, Aevent, RISING);
-  attachInterrupt(B, Bevent, CHANGE);
+  attachInterrupt(0, Aevent, RISING);
+  attachInterrupt(1, Bevent, CHANGE);
   motor->run(dir);
 }
 
 void loop() {
-  // curspeedtime = micros();
-  // if (curspeedtime - lspeedtime > 4e3) {
-  //   mspeed += 42;
+  curspeedtime = millis();
+  if (curspeedtime - lspeedtime > 4e3) {
+    mspeed += 42;
 
-  //   lspeedtime = curspeedtime;
-  //   motor->setSpeed(mspeed);
-  //   if (mspeed > 210)
-  //     dir = dir == FORWARD? BACKWARD : FORWARD;
+    lspeedtime = curspeedtime;
+    motor->setSpeed(mspeed);
 
-  //   motor->run(dir);
-  //   Serial.print("Speed: ");
-  //   Serial.print(mspeed);
-  //   Serial.println("======================");
-  // }
+    dir = dir == FORWARD? BACKWARD : FORWARD;
+    motor->run(dir);
+    Serial.print("Speed: ");
+    Serial.print(mspeed);
+    Serial.println("======================");
+  }
 
-  // mvel = motordir*1.0/((float)(pulsetime*32e-6));
+  mvel = motordir*1.0/((float)(pulsetime*32e-6));
 
   // Serial.print("pos: ");
   // Serial.print(pos);
   Serial.print(" vel: ");
-  Serial.println(pulsetime);
+  Serial.println(mvel);
 }
