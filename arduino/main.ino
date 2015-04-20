@@ -17,7 +17,7 @@ volatile int motordir = 0;
 volatile int pos = 0;
 
 void Aevent() {
-  if (digitalRead(B)) {
+  if (digitalRead(B) == HIGH) {
     motordir = -1;
     pos--;
   } else {
