@@ -9,9 +9,12 @@ tauL = sqrt(g/l); % sec
 
 G = -s^2/g/((tauL*s + 1)*(tauL*s - 1));
 
-%% series compensator tf
+%% series compensator tf (lag)
 
-K = 1;
+tau = 1;
+alpha = 1;
+
+K = alpha*(tau*s + 1)/(alpha*tau*s + 1);
 
 %% motor tf
 Ke = .0111; % V*sec/rad
