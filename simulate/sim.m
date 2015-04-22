@@ -20,27 +20,28 @@ K = alpha*(tau*s + 1)/(alpha*tau*s + 1);
 Ke = .0111; % V*sec/rad
 tauM = .0596; % sec
 
-M = 1/Ke/(1 + tauM*s); % Vout/Vin
+M = 1/Ke/(s*(1 + tauM*s)); % Vout/Vin
 
 % velocity minor loop
 kV = 1;
+enc = kV*s;
 
-Mc = M/(s*(1 + M*kV)); % X/Vin 
+Mc = M/(1 + M*enc); % X/Vin 
 
 % position positive feedback
 kP = 1;
 
-Lminor = K*Mc*kP; % minor position loop TF
+Lminor = M*enc; % minor position loop TF
 KM = K*Mc;
 
-KMp = KM/(1 - kP*KM); % actual minor loop
+KMp = KM/(1 - kP*KM); % large minor loop
 
 Lmajor = KMp*G; % total loop TF
 XoverTheta = KMp/(1 - G*KMp); % total TF
 
 figure(1)
 clf
-bode(Lmajor)
+rlocus(Mc)
 hold on
 % subplot(211)
 % margin(M)
