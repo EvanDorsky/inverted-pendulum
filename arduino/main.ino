@@ -1,6 +1,6 @@
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
-#include "utility/Adafruit_PWMServoDriver.h"
+#include <TimerOne.h>
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 Adafruit_DCMotor *motor = AFMS.getMotor(1);
@@ -48,30 +48,27 @@ void Bevent() {
   lasttime = curtime;
 }
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println("Inverted pendulum");
+void control()
+{
+  // mvel = mdir*1.0/((float)(pulsetime*32e-6));
+  // potpos = analogRead(pot) - setpotpos;
 
+  merr = setpos - mpos;
+  mdir = merr < 0? BACKWARD : FORWARD;
+  mspeed = abs(merr) > 255? 255 : abs(merr);
+}
+
+void setup() {
   AFMS.begin();
 
   attachInterrupt(0, Aevent, RISING);
   attachInterrupt(1, Bevent, CHANGE);
-  motor->run(mdir);
+
+  Timer1.initialize(1e3);
+  Timer1.attachInterrupt(control);
 }
 
 void loop() {
-  // mvel = mdir*1.0/((float)(pulsetime*32e-6));
-  potpos = analogRead(pot) - setpotpos;
-
-  merr = setpos - mpos;
-  mdir = merr < 0? BACKWARD : FORWARD;
-  mspeed = abs(merr/2) > 255? 255 : abs(merr/2);
-
   motor->setSpeed(mspeed);
   motor->run(mdir);
-
-  Serial.print("merr: ");
-  Serial.print(merr);
-  Serial.print(" vel: ");
-  Serial.println(mvel);
 }
