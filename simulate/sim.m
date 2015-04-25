@@ -30,7 +30,7 @@ g = 9.8; % m/sec^2
 l = 0.0936; % m
 tauL = sqrt(l/g); % sec
 
-G = -s^2/g/((tauL*s + 1)*(tauL*s - 1));
+G = -s^2/g/((tauL*s + 1)*(tauL*s - 1)); % Theta/X
 
 Sys = KMp/(1 - G*KMp); % X/Theta (- because G is -)
 

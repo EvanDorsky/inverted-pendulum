@@ -22,23 +22,28 @@ float mvel = 0; // measured velocity
 int merr = 0; // motor position error
 
 // pendulum variables
-float potpos = 0;
 float deg90 = 688;
 float deg0 = 439; // with 5V ADC reference and supply
 float degmin90 = 198;
-float Kp = M_PI/4.0*(1.0/(deg90 - deg0) + 1.0/(deg0 - degmin90)); // ADC to rad
+float kP = M_PI/4.0*(1.0/(deg90 - deg0) + 1.0/(deg0 - degmin90)); // ADC to rad
 
 // loop variables
 static unsigned long lspeedtime = 0;
 static unsigned long curspeedtime = 0;
 
 // control variables
-static float T = 1e-3; // sec
+static float T = .001; // sec
+float thetak = 0;
+float thetak1 = 0;
+float Voutk = 0;
+float Voutk1 = 0;
+
+float kMotDAC = 1023.0/255.0;
 
 // K (series compensator)
-float Kzero = exp(-15.0*T);
-float Kpole = exp(-1.0*T);
-float Kd = 15.0/1.0*((1.0 - Kzero)/(1.0 - Kpole)); // Kc = 1
+float kZero = exp(-15.0*T);
+float kPole = exp(-1.0*T);
+float kD = 15.0/1.0*((1.0 - kZero)/(1.0 - kPole)); // Kc = 1
 
 void Aevent() {
   if (digitalRead(B) == HIGH) {
@@ -61,16 +66,18 @@ void Bevent() {
 void control()
 {
   // mvel = mdir*1.0/((float)(pulsetime*32e-6));
-  potpos = (analogRead(pot) - deg0)*Kp;
+  thetak = (analogRead(pot) - deg0)*kP;
 
-  merr = setpos - mpos;
-  mdir = merr < 0? BACKWARD : FORWARD;
-  mspeed = abs(merr) > 255? 255 : abs(merr);
+  Voutk = Voutk1*kPole + kD*(thetak - thetak1*kZero);
+
+  mdir = Voutk < 0? BACKWARD : FORWARD;
+
+  thetak1 = thetak;
+  Voutk1 = Voutk;
 }
 
 void setup() {
   AFMS.begin();
-  Serial.begin(115200);
 
   attachInterrupt(0, Aevent, RISING);
   attachInterrupt(1, Bevent, CHANGE);
@@ -83,12 +90,6 @@ static unsigned long lastprint = 0;
 static unsigned long curprint = 0;
 
 void loop() {
-  curprint = millis();
-  if (curprint - lastprint > 50) {
-    Serial.println(potpos);
-    lastprint = curprint;
-  }
-
-  motor->setSpeed(mspeed);
+  motor->setSpeed(abs(Voutk)*kMotDAC);
   motor->run(mdir);
 }
