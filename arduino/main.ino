@@ -38,7 +38,7 @@ float thetak1 = 0;
 float Voutk = 0;
 float Voutk1 = 0;
 
-float kMotDAC = 1023.0/255.0;
+float kMotDAC = 1.0;
 
 // K (series compensator)
 float kZero = exp(-15.0*T);
@@ -77,10 +77,10 @@ void control()
 }
 
 void setup() {
-  AFMS.begin();
+  // AFMS.begin(); higher freq
 
-  attachInterrupt(0, Aevent, RISING);
-  attachInterrupt(1, Bevent, CHANGE);
+  // attachInterrupt(0, Aevent, RISING);
+  // attachInterrupt(1, Bevent, CHANGE);
 
   Timer1.initialize((int)(T*1e6));
   Timer1.attachInterrupt(control);
