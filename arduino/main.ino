@@ -22,28 +22,29 @@ float mvel = 0; // measured velocity
 int merr = 0; // motor position error
 
 // pendulum variables
-float deg90 = 688;
-float deg0 = 439; // with 5V ADC reference and supply
-float degmin90 = 198;
-float kP = M_PI/4.0*(1.0/(deg90 - deg0) + 1.0/(deg0 - degmin90)); // ADC to rad
+// #define deg90 = 688;
+#define deg0 439 // with 5V ADC reference and supply
+// #define degmin90 = 198;
+// #define kP M_PI/4.0*(1.0/(deg90 - deg0) + 1.0/(deg0 - degmin90))
+#define kP .00641 // ADC to rad
 
 // loop variables
 static unsigned long lspeedtime = 0;
 static unsigned long curspeedtime = 0;
 
 // control variables
-static float T = .001; // sec
+#define T .001 // sec
 float thetak = 0;
 float thetak1 = 0;
 float Voutk = 0;
 float Voutk1 = 0;
 
-float kMotDAC = 1.0;
+#define kMotDAC 21.25
 
 // K (series compensator)
-float kZero = exp(-15.0*T);
-float kPole = exp(-1.0*T);
-float kD = 15.0/1.0*((1.0 - kZero)/(1.0 - kPole)); // Kc = 1
+// float kZero = exp(-15.0*T);
+// float kPole = exp(-1.0*T);
+// float kD = 15.0/1.0*((1.0 - kZero)/(1.0 - kPole)); // Kc = 1
 
 void Aevent() {
   if (digitalRead(B) == HIGH) {
@@ -68,7 +69,7 @@ void control()
   // mvel = mdir*1.0/((float)(pulsetime*32e-6));
   thetak = (analogRead(pot) - deg0)*kP;
 
-  Voutk = Voutk1*kPole + kD*(thetak - thetak1*kZero);
+  Voutk = Voutk1*0.995 + .2646*(thetak - thetak1*.2612);
 
   mdir = Voutk < 0? BACKWARD : FORWARD;
 
@@ -77,10 +78,11 @@ void control()
 }
 
 void setup() {
-  // AFMS.begin(); higher freq
+  // Serial.begin(115200);
+  AFMS.begin();
 
-  // attachInterrupt(0, Aevent, RISING);
-  // attachInterrupt(1, Bevent, CHANGE);
+  attachInterrupt(0, Aevent, RISING);
+  attachInterrupt(1, Bevent, CHANGE);
 
   Timer1.initialize((int)(T*1e6));
   Timer1.attachInterrupt(control);
@@ -90,6 +92,12 @@ static unsigned long lastprint = 0;
 static unsigned long curprint = 0;
 
 void loop() {
-  motor->setSpeed(abs(Voutk)*kMotDAC);
+  // curprint = millis();
+  // if (curprint - lastprint > 50) {
+  //   Serial.println(thetak);
+  //   lastprint = curprint;
+  // }
+
+  motor->setSpeed((int)(fabsf(Voutk)*kMotDAC));
   motor->run(mdir);
 }

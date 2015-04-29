@@ -6,7 +6,7 @@ s = tf('s');
 Ke = .0111; % V*sec/rad
 n = 1/30; % gearbox reduction
 m = 1/2; % pulley reduction
-Larm = .127; % m
+Larm = .1332; % m (5.245in)
 Ke = Ke*Larm/n/m; % corrected (and linear) motor constant
 tauM = .0596; % sec
 
@@ -25,7 +25,9 @@ Mpc = 1/(1/Mc - kP);
 
 %% series compensator tf (lag)
 
-K = (s + 13)/(s + .5);
+T = 1e-3;
+K = .263*(s + 13)/(s + .5)
+c2d(K, T, 'tustin')
 
 KMp = K*Mpc;
 
@@ -41,17 +43,19 @@ Sys = KMp/(1 - G*KMp); % X/Theta (- because G is -)
 figure(1)
 clf
 subplot(211)
-bode(Sys)
+margin(Sys)
 % hold on
 % bode(Sys)
 subplot(223)
 pzmap(G,'b',Mpc,'r', K, 'g')
 legend('Pendulum', 'Motor', 'Compensator')
 subplot(224)
-step(1/(1+1/M))
-hold on
-step(1/(1+1/Mpc))
+step(1/(1+1/Sys))
 
 figure(2)
 clf
 rlocus(-G*Mpc*K)
+
+figure(3)
+clf
+nyquist(Sys)
