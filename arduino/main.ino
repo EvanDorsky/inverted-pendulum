@@ -14,7 +14,7 @@ volatile unsigned long curtime = 0;
 volatile unsigned long pulsetime = 0;
 
 // motor variables
-volatile int mdir = 0;
+volatile int mdir = 1;
 volatile int mpos = 0;
 int setpos = 100;
 int mspeed = 0; // set speed
@@ -38,6 +38,8 @@ float thetak = 0;
 float thetak1 = 0;
 float Voutk = 0;
 float Voutk1 = 0;
+
+float posFb = 0;
 
 #define kMotDAC 21.25
 
@@ -66,10 +68,12 @@ void Bevent() {
 
 void control()
 {
-  // mvel = mdir*1.0/((float)(pulsetime*32e-6));
+  // posFb = mpos*0.0026;
+  // if (pulsetime)
+  //   mvel = mdir*1.0/((float)(pulsetime*32e-6));
   thetak = (analogRead(pot) - deg0)*kP;
 
-  Voutk = Voutk1*0.995 + .2646*(thetak - thetak1*.2612);
+  Voutk = Voutk1*0.999 + 1.571*(thetak - thetak1*1.548) - posFb - 0.04*mvel;
 
   mdir = Voutk < 0? BACKWARD : FORWARD;
 
@@ -78,7 +82,6 @@ void control()
 }
 
 void setup() {
-  // Serial.begin(115200);
   AFMS.begin();
 
   attachInterrupt(0, Aevent, RISING);
@@ -92,12 +95,6 @@ static unsigned long lastprint = 0;
 static unsigned long curprint = 0;
 
 void loop() {
-  // curprint = millis();
-  // if (curprint - lastprint > 50) {
-  //   Serial.println(thetak);
-  //   lastprint = curprint;
-  // }
-
   motor->setSpeed((int)(fabsf(Voutk)*kMotDAC));
   motor->run(mdir);
 }

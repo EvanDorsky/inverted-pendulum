@@ -26,14 +26,15 @@ Mpc = 1/(1/Mc - kP);
 %% series compensator tf (lag)
 
 T = 1e-3;
-K = .263*(s + 13)/(s + .5)
+K = 1.56*(s + 15)/(s + 1)
 c2d(K, T, 'tustin')
 
 KMp = K*Mpc;
 
 % pendulum tf
 g = 9.8; % m/sec^2
-l = 0.0936; % m
+% l = 0.0936; % m (5", now destroyed)
+l = 0.1195; % m (6.5")
 tauL = sqrt(l/g); % sec
 
 G = -s^2/g/((tauL*s + 1)*(tauL*s - 1)); % Theta/X
