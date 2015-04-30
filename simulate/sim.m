@@ -19,39 +19,37 @@ enc = kV*s;
 Mc = 1/(1/M + enc); % X/Vin 
 
 % position positive feedback
+% 960 counts per motor rot -> 480 per arm -> 0-2pi
+kPosConv = (2*pi)/960;
 kP = 0.2;
 
-Mpc = 1/(1/Mc - kP);
+Mpc = 1/(1/Mc - kP)
 
 %% series compensator tf (lag)
 
 T = 1e-3;
-K = 1.56*(s + 15)/(s + 1)
-c2d(K, T, 'tustin')
+K = 0.58*(s + 5)/(s + .05)
+c2d(K, T, 'matched');
 
 KMp = K*Mpc;
 
 % pendulum tf
 g = 9.8; % m/sec^2
 % l = 0.0936; % m (5", now destroyed)
-l = 0.1195; % m (6.5")
+l = 0.2659; % m (6.5")
 tauL = sqrt(l/g); % sec
 
-G = -s^2/g/((tauL*s + 1)*(tauL*s - 1)); % Theta/X
+G = -s^2/g/((tauL*s + 1)*(tauL*s - 1)) % Theta/X
 
-Sys = KMp/(1 - G*KMp); % X/Theta (- because G is -)
+Sys = KMp*-G; % X/Theta (- because G is -)
 
 figure(1)
 clf
-subplot(211)
+margin(K)
+hold on
 margin(Sys)
-% hold on
-% bode(Sys)
-subplot(223)
-pzmap(G,'b',Mpc,'r', K, 'g')
-legend('Pendulum', 'Motor', 'Compensator')
-subplot(224)
-step(1/(1+1/Sys))
+% subplot(224)
+% step(1/(1+1/Sys))
 
 figure(2)
 clf
@@ -60,3 +58,7 @@ rlocus(-G*Mpc*K)
 figure(3)
 clf
 nyquist(Sys)
+
+figure(4)
+clf
+pzmap(1/(1+1/Sys))

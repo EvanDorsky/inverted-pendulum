@@ -33,6 +33,7 @@ static unsigned long lspeedtime = 0;
 static unsigned long curspeedtime = 0;
 
 // control variables
+int drivedir = 0;
 #define T .001 // sec
 float thetak = 0;
 float thetak1 = 0;
@@ -68,20 +69,22 @@ void Bevent() {
 
 void control()
 {
-  // posFb = mpos*0.0026;
+  // posFb = mpos*0.0013;
   // if (pulsetime)
   //   mvel = mdir*1.0/((float)(pulsetime*32e-6));
   thetak = (analogRead(pot) - deg0)*kP;
 
-  Voutk = Voutk1*0.999 + 1.571*(thetak - thetak1*1.548) - posFb - 0.04*mvel;
+  Voutk = Voutk1*0.997 + 0.6039*(thetak - thetak1*0.5949) + posFb;
 
-  mdir = Voutk < 0? BACKWARD : FORWARD;
+  drivedir = Voutk < 0? BACKWARD : FORWARD;
+  // Voutk = Voutk > 12? 12 : Voutk;
 
   thetak1 = thetak;
   Voutk1 = Voutk;
 }
 
 void setup() {
+  Serial.begin(115200);
   AFMS.begin();
 
   attachInterrupt(0, Aevent, RISING);
@@ -94,7 +97,16 @@ void setup() {
 static unsigned long lastprint = 0;
 static unsigned long curprint = 0;
 
+float driveV = 0;
+
 void loop() {
-  motor->setSpeed((int)(fabsf(Voutk)*kMotDAC));
-  motor->run(mdir);
+  // curprint = millis();
+  // if (curprint - lastprint > 100) {
+  //   Serial.println(Voutk);
+  //   lastprint = curprint;
+  // }
+  driveV = Voutk > 12? 12 : Voutk;
+  driveV = Voutk < -12? -12 : Voutk;
+  motor->setSpeed((int)(fabsf(driveV)*kMotDAC));
+  motor->run(drivedir);
 }
