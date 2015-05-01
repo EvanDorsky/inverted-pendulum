@@ -9,6 +9,8 @@ int pot = A0;
 int A = 2;
 int B = 3;
 
+// #define DEBUG
+
 volatile unsigned long lasttime = 0;
 volatile unsigned long curtime = 0;
 volatile unsigned long pulsetime = 0;
@@ -27,6 +29,7 @@ int merr = 0; // motor position error
 // #define degmin90 = 198;
 // #define kP M_PI/4.0*(1.0/(deg90 - deg0) + 1.0/(deg0 - degmin90))
 #define kP .00641 // ADC to rad
+#define kPosF .0001
 
 // loop variables
 static unsigned long lspeedtime = 0;
@@ -69,12 +72,12 @@ void Bevent() {
 
 void control()
 {
-  // posFb = mpos*0.0013;
-  // if (pulsetime)
-  //   mvel = mdir*1.0/((float)(pulsetime*32e-6));
+  posFb = mpos*kPosF; // kPosF determined by matlab
+  if (pulsetime)
+    mvel = mdir*1.0/((float)(pulsetime*32e-6))*.0022;
   thetak = (analogRead(pot) - deg0)*kP;
 
-  Voutk = Voutk1*0.997 + 0.6039*(thetak - thetak1*0.5949) + posFb;
+  Voutk = Voutk1*.9994 + .2637*(thetak - .2621*thetak1) + posFb/* - .01*mvel*/;
 
   drivedir = Voutk < 0? BACKWARD : FORWARD;
   // Voutk = Voutk > 12? 12 : Voutk;
@@ -84,7 +87,10 @@ void control()
 }
 
 void setup() {
-  Serial.begin(115200);
+  #ifdef DEBUG
+    Serial.begin(115200);
+  #endif
+  
   AFMS.begin();
 
   attachInterrupt(0, Aevent, RISING);
@@ -94,19 +100,32 @@ void setup() {
   Timer1.attachInterrupt(control);
 }
 
-static unsigned long lastprint = 0;
-static unsigned long curprint = 0;
+#ifdef DEBUG
+  static unsigned long lastprint = 0;
+  static unsigned long curprint = 0;
+#endif
 
 float driveV = 0;
+unsigned int STOP = 0;
 
 void loop() {
-  // curprint = millis();
-  // if (curprint - lastprint > 100) {
-  //   Serial.println(Voutk);
-  //   lastprint = curprint;
-  // }
-  driveV = Voutk > 12? 12 : Voutk;
-  driveV = Voutk < -12? -12 : Voutk;
-  motor->setSpeed((int)(fabsf(driveV)*kMotDAC));
-  motor->run(drivedir);
+  #ifdef DEBUG
+    curprint = millis();
+    if (curprint - lastprint > 100) {
+      Serial.println(thetak);
+      Serial.println(STOP);
+      lastprint = curprint;
+    }
+  #endif
+  if (thetak > 1.4 || thetak < -1.4) { // about 90deg
+    STOP = 1;
+    motor->setSpeed(0);
+    motor->run(RELEASE);
+  }
+  if (STOP == 0) {
+    driveV = Voutk > 12? 12 : Voutk;
+    driveV = Voutk < -12? -12 : Voutk;
+    motor->setSpeed((int)(fabsf(driveV)*kMotDAC));
+    motor->run(drivedir);
+  }
 }
