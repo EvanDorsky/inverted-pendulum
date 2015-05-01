@@ -9,7 +9,7 @@ int pot = A0;
 int A = 2;
 int B = 3;
 
-// #define DEBUG
+#define DEBUG
 
 volatile unsigned long lasttime = 0;
 volatile unsigned long curtime = 0;
@@ -29,7 +29,7 @@ int merr = 0; // motor position error
 // #define degmin90 = 198;
 // #define kP M_PI/4.0*(1.0/(deg90 - deg0) + 1.0/(deg0 - degmin90))
 #define kP .00641 // ADC to rad
-#define kPosF .0001
+#define kPosF .00741 // .00641*.2
 
 // loop variables
 static unsigned long lspeedtime = 0;
@@ -77,7 +77,7 @@ void control()
     mvel = mdir*1.0/((float)(pulsetime*32e-6))*.0022;
   thetak = (analogRead(pot) - deg0)*kP;
 
-  Voutk = Voutk1*.9994 + 26.2291*(thetak - .994*thetak1) + posFb/* - .01*mvel*/;
+  Voutk = Voutk1*.9998 + 8341.9*(thetak - .9937*thetak1) + posFb/* - .01*mvel*/;
 
   drivedir = Voutk < 0? BACKWARD : FORWARD;
   // Voutk = Voutk > 12? 12 : Voutk;

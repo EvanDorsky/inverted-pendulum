@@ -21,22 +21,23 @@ Mc = 1/(1/M + enc); % X/Vin
 
 % position positive feedback
 % 960 counts per motor rot -> 480 per arm -> 0-2pi
-kPosConv = (2*pi)/960;
-kP = 0.2;
+kPosConv = (2*pi)/960; % .0065
+kP = 1.0;
 
 Mpc = 1/(1/Mc - kP);
 
 %% series compensator tf (lag)
 
 T = 1e-3;
-tauA = 1/1.4;
-tauB = 10/1.4;
-Kc = 2.8
+tauA = 1/(sqrt(10)*2);
+tauB = 10*tauA*3;
+Kc = 10/sqrt(10)*2.94;
 % K = 1;
+Ktest = Kc*(tauA*s + 1)/(tauB*s + 1)
 K = Kc*(tauA*s + 1)/(tauB*s + 1)
 eaT = exp(-1/tauA*T)
 ebT = exp(-1/tauB*T)
-Kd = Kc*b/a*((1 - eaT)/(1 - ebT))
+Kd = Kc*tauB/tauA*((1 - eaT)/(1 - ebT))
 
 KMp = K*Mpc;
 
@@ -55,7 +56,10 @@ Sys = KMp*-G; % X/Theta (- because G is -)
 
 figure(1)
 clf
+margin(Ktest)
+hold on
 margin(Sys)
+grid on
 
 figure(2)
 clf
