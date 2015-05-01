@@ -77,7 +77,7 @@ void control()
     mvel = mdir*1.0/((float)(pulsetime*32e-6))*.0022;
   thetak = (analogRead(pot) - deg0)*kP;
 
-  Voutk = Voutk1*.9994 + .2637*(thetak - .2621*thetak1) + posFb/* - .01*mvel*/;
+  Voutk = Voutk1*.9994 + 26.2291*(thetak - .994*thetak1) + posFb/* - .01*mvel*/;
 
   drivedir = Voutk < 0? BACKWARD : FORWARD;
   // Voutk = Voutk > 12? 12 : Voutk;
@@ -90,7 +90,7 @@ void setup() {
   #ifdef DEBUG
     Serial.begin(115200);
   #endif
-  
+
   AFMS.begin();
 
   attachInterrupt(0, Aevent, RISING);

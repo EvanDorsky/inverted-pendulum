@@ -24,17 +24,19 @@ Mc = 1/(1/M + enc); % X/Vin
 kPosConv = (2*pi)/960;
 kP = 0.2;
 
-Mpc = 1/(1/Mc - kP)
+Mpc = 1/(1/Mc - kP);
 
 %% series compensator tf (lag)
 
 T = 1e-3;
-zeroW = 6;
-poleW = .6;
-K = (s + zeroW)/(s + poleW)
-c2d(.263*K, T, 'matched')
-zzero = exp(-zeroW*T)
-zpole = exp(-poleW*T)
+tauA = 1/1.4;
+tauB = 10/1.4;
+Kc = 2.8
+% K = 1;
+K = Kc*(tauA*s + 1)/(tauB*s + 1)
+eaT = exp(-1/tauA*T)
+ebT = exp(-1/tauB*T)
+Kd = Kc*b/a*((1 - eaT)/(1 - ebT))
 
 KMp = K*Mpc;
 
@@ -47,7 +49,7 @@ g = 9.8; % m/sec^2
 l = 0.1651; % new delrin 10"
 tauL = sqrt(l/g); % sec
 
-G = -s^2/g/((tauL*s + 1)*(tauL*s - 1)) % Theta/X
+G = -s^2/g/((tauL*s + 1)*(tauL*s - 1)); % Theta/X
 
 Sys = KMp*-G; % X/Theta (- because G is -)
 
