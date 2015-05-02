@@ -9,7 +9,7 @@ int pot = A0;
 int A = 2;
 int B = 3;
 
-#define DEBUG
+// #define DEBUG
 
 volatile unsigned long lasttime = 0;
 volatile unsigned long curtime = 0;
@@ -25,11 +25,11 @@ int merr = 0; // motor position error
 
 // pendulum variables
 // #define deg90 = 688;
-#define deg0 439 // with 5V ADC reference and supply
+// #define deg0 439 // with 5V ADC reference and supply
 // #define degmin90 = 198;
 // #define kP M_PI/4.0*(1.0/(deg90 - deg0) + 1.0/(deg0 - degmin90))
 #define kP .00641 // ADC to rad
-#define kPosF .00741 // .00641*.2
+#define kPosF 0.0013 // .00641*.2
 
 // loop variables
 static unsigned long lspeedtime = 0;
@@ -43,7 +43,7 @@ float thetak1 = 0;
 float Voutk = 0;
 float Voutk1 = 0;
 
-float posFb = 0;
+float posFb = 0.0013;
 
 #define kMotDAC 21.25
 
@@ -70,14 +70,17 @@ void Bevent() {
   lasttime = curtime;
 }
 
+float theta0 = 0;
+
 void control()
 {
   posFb = mpos*kPosF; // kPosF determined by matlab
-  if (pulsetime)
-    mvel = mdir*1.0/((float)(pulsetime*32e-6))*.0022;
-  thetak = (analogRead(pot) - deg0)*kP;
+  // if (pulsetime)
+    //  the speed calculation is probably wrong
+  //   mvel = mdir*1.0/((float)(pulsetime*32e-6))*.0022;
+  thetak = analogRead(pot)*kP - theta0;
 
-  Voutk = Voutk1*.9998 + 8341.9*(thetak - .9937*thetak1) + posFb/* - .01*mvel*/;
+  Voutk = Voutk1*.99975906 + 870.01989*(thetak - .99759324*thetak1) + posFb/* - .01*mvel*/;
 
   drivedir = Voutk < 0? BACKWARD : FORWARD;
   // Voutk = Voutk > 12? 12 : Voutk;
@@ -87,6 +90,7 @@ void control()
 }
 
 void setup() {
+  theta0 = 2.794760;
   #ifdef DEBUG
     Serial.begin(115200);
   #endif
@@ -112,12 +116,12 @@ void loop() {
   #ifdef DEBUG
     curprint = millis();
     if (curprint - lastprint > 100) {
-      Serial.println(thetak);
-      Serial.println(STOP);
+      Serial.println(thetak*10000);
+      // Serial.println(STOP);
       lastprint = curprint;
     }
   #endif
-  if (thetak > 1.4 || thetak < -1.4) { // about 90deg
+  if ((thetak > 1.4 || thetak < -1.4) && (thetak1 > 1.4 || thetak1 < -1.4)) { // about 90deg (current and last)
     STOP = 1;
     motor->setSpeed(0);
     motor->run(RELEASE);

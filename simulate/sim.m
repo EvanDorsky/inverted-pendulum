@@ -1,5 +1,7 @@
 clc, clear all
 
+format long e
+
 s = tf('s');
 
 %% motor tf
@@ -20,21 +22,21 @@ enc = kV*s;
 Mc = 1/(1/M + enc); % X/Vin 
 
 % position positive feedback
-% 960 counts per motor rot -> 480 per arm -> 0-2pi
+% 960 counts per arm rot -> 0-2pi
 kPosConv = (2*pi)/960; % .0065
-kP = 1.0;
+kP = 0.2;
 
 Mpc = 1/(1/Mc - kP);
 
 %% series compensator tf (lag)
 
 T = 1e-3;
-tauA = 1/(sqrt(10)*2);
-tauB = 10*tauA*3;
-Kc = 10/sqrt(10)*2.94;
-% K = 1;
+tauA = 1/(sqrt(10)*.762);
+tauB = 10*tauA;
+% Kc = 10/(sqrt(10)*3.41);
+Kc = db2mag(8.8)*sqrt(10);
 Ktest = Kc*(tauA*s + 1)/(tauB*s + 1)
-K = Kc*(tauA*s + 1)/(tauB*s + 1)
+K = Ktest;
 eaT = exp(-1/tauA*T)
 ebT = exp(-1/tauB*T)
 Kd = Kc*tauB/tauA*((1 - eaT)/(1 - ebT))
@@ -47,7 +49,8 @@ g = 9.8; % m/sec^2
 % l = 0.1195; %m (6.5")
 % l = 0.2659; % m (15")
 % l = 0.1944; % m (10")
-l = 0.1651; % new delrin 10"
+% l = 0.1651; % new delrin 10"
+l = 0.18923; % new mdf 10"
 tauL = sqrt(l/g); % sec
 
 G = -s^2/g/((tauL*s + 1)*(tauL*s - 1)); % Theta/X
@@ -55,20 +58,25 @@ G = -s^2/g/((tauL*s + 1)*(tauL*s - 1)); % Theta/X
 Sys = KMp*-G; % X/Theta (- because G is -)
 
 figure(1)
+opts = bodeoptions('cstprefs');
+opts.XLabel.Interpreter = 'latex';
+opts.YLabel.Interpreter = 'latex';
+opts.Title.Interpreter = 'latex';
 clf
 margin(Ktest)
 hold on
 margin(Sys)
+% title('System with Positive Position Feedback and Lag Compensator')
 grid on
 
-figure(2)
-clf
-rlocus(-G*Mpc*K)
+% figure(2)
+% clf
+% rlocus(-G*Mpc*K)
 
-figure(3)
-clf
-nyquist(Sys)
+% figure(3)
+% clf
+% nyquist(Sys)
 
-figure(4)
-clf
-pzmap(1/(1+1/Sys))
+% figure(4)
+% clf
+% pzmap(1/(1+1/Sys))
