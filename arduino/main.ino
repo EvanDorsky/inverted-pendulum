@@ -30,6 +30,7 @@ int merr = 0; // motor position error
 // #define kP M_PI/4.0*(1.0/(deg90 - deg0) + 1.0/(deg0 - degmin90))
 #define kP .00641 // ADC to rad
 #define kPosF 0.00013 // .00641*.2
+// #define kPosF 0 // .00641*.2
 
 // loop variables
 static unsigned long lspeedtime = 0;
@@ -38,10 +39,11 @@ static unsigned long curspeedtime = 0;
 // control variables
 int drivedir = 0;
 #define T .001 // sec
-float thetak = 0;
-float thetak1 = 0;
-float Voutk = 0;
-float Voutk1 = 0;
+volatile float thetak = 0;
+volatile float thetak1 = 0;
+volatile float Voutk = 0;
+volatile float Voutk1 = 0;
+volatile int mposk1 = 0;
 
 float posFb = 0.0013;
 
@@ -75,22 +77,23 @@ float theta0 = 0;
 void control()
 {
   posFb = mpos*kPosF; // kPosF determined by matlab
-  // if (pulsetime)
-  //   mvel = mdir*1.0/((float)(pulsetime*32e-6))*.0022;
+  if (pulsetime)
+    mvel = mdir*1.0/((float)(pulsetime*32e-6))*.0022;
   thetak = analogRead(pot)*kP - theta0;
 
-  Voutk = Voutk1*.99970004 + 7857.1779*(thetak - .99203191*thetak1) + posFb/* - .01*mvel*/;
+  Voutk = Voutk1*.99970004 + 7857.1779*(thetak - .99203191*thetak1) + posFb - .1*mvel;
 
   drivedir = Voutk < 0? BACKWARD : FORWARD;
   // Voutk = Voutk > 12? 12 : Voutk;
 
   thetak1 = thetak;
   Voutk1 = Voutk;
+  mposk1 = mpos;
 }
 
 void setup() {
-  theta0 = 3.256280;
-  // theta0 = analogRead(pot)*kP;
+  // theta0 = 3.26908;
+  theta0 = analogRead(pot)*kP;
   #ifdef DEBUG
     Serial.begin(115200);
   #endif
@@ -115,9 +118,13 @@ unsigned int STOP = 0;
 void loop() {
   #ifdef DEBUG
     curprint = millis();
-    if (curprint - lastprint > 10) {
-      Serial.println(thetak*10000);
-      // Serial.println(STOP);
+    if (curprint - lastprint > 100) {
+      Serial.print("Angle: ");
+      Serial.print(thetak*10000);
+      Serial.print(" Pos: ");
+      Serial.print(mpos);
+      Serial.print(" Vout: ");
+      Serial.println(Voutk);
       lastprint = curprint;
     }
   #endif
