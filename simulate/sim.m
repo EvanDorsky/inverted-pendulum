@@ -31,10 +31,10 @@ Mpc = 1/(1/Mc - kP);
 %% series compensator tf (lag)
 
 T = 1e-3;
-tauA = 1/(sqrt(10)*.762);
+tauA = 1/(sqrt(10)*1.65);
 tauB = 10*tauA;
 % Kc = 10/(sqrt(10)*3.41);
-Kc = db2mag(8.8)*sqrt(10);
+Kc = sqrt(10)*db2mag(2.4);
 Ktest = Kc*(tauA*s + 1)/(tauB*s + 1)
 K = Ktest;
 eaT = exp(-1/tauA*T)
@@ -63,20 +63,31 @@ opts.XLabel.Interpreter = 'latex';
 opts.YLabel.Interpreter = 'latex';
 opts.Title.Interpreter = 'latex';
 clf
-margin(Ktest)
-hold on
-margin(Sys)
-% title('System with Positive Position Feedback and Lag Compensator')
+% margin(Ktest)
+% hold on
+bodeplot(Sys, opts)
+h = findobj(gcf, 'type', 'line')
+set(h, 'linewidth', 4);
+title('System with Positive Position Feedback and Lag Compensator')
 grid on
 
-% figure(2)
-% clf
-% rlocus(-G*Mpc*K)
+figure(2)
+clf
+rlocus(-G*Mpc*K)
 
-% figure(3)
-% clf
-% nyquist(Sys)
+nopts = nyquistoptions('cstprefs');
+nopts.XLabel.Interpreter = 'latex';
+nopts.YLabel.Interpreter = 'latex';
+nopts.Title.Interpreter = 'latex';
+nopts.Title.Interpreter = 'latex';
 
-% figure(4)
-% clf
-% pzmap(1/(1+1/Sys))
+figure(3)
+clf
+nyquistplot(Sys, nopts)
+h = findobj(gcf, 'type', 'line')
+set(h, 'linewidth', 4);
+title('System with Positive Position Feedback and Lag Compensator')
+
+figure(4)
+clf
+pzmap(1/(1+1/Sys))

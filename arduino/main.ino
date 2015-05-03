@@ -80,7 +80,7 @@ void control()
   //   mvel = mdir*1.0/((float)(pulsetime*32e-6))*.0022;
   thetak = analogRead(pot)*kP - theta0;
 
-  Voutk = Voutk1*.99975906 + 870.01989*(thetak - .99759324*thetak1) + posFb/* - .01*mvel*/;
+  Voutk = Voutk1*.99947836 + 415.89219312*(thetak - .9947958307*thetak1) + posFb/* - .01*mvel*/;
 
   drivedir = Voutk < 0? BACKWARD : FORWARD;
   // Voutk = Voutk > 12? 12 : Voutk;
