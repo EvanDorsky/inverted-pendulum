@@ -76,7 +76,6 @@ void control()
 {
   posFb = mpos*kPosF; // kPosF determined by matlab
   // if (pulsetime)
-    //  the speed calculation is probably wrong
   //   mvel = mdir*1.0/((float)(pulsetime*32e-6))*.0022;
   thetak = analogRead(pot)*kP - theta0;
 
@@ -90,15 +89,16 @@ void control()
 }
 
 void setup() {
-  theta0 = 2.794760;
+  // theta0 = 2.794760;
+  theta0 = analogRead(pot)*kP;
   #ifdef DEBUG
     Serial.begin(115200);
   #endif
 
   AFMS.begin();
 
-  attachInterrupt(0, Aevent, RISING);
-  attachInterrupt(1, Bevent, CHANGE);
+  // attachInterrupt(0, Aevent, RISING);
+  // attachInterrupt(1, Bevent, CHANGE);
 
   Timer1.initialize((int)(T*1e6));
   Timer1.attachInterrupt(control);
