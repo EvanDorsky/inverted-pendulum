@@ -89,8 +89,8 @@ void control()
 }
 
 void setup() {
-  // theta0 = 2.794760;
-  theta0 = analogRead(pot)*kP;
+  theta0 = 3.256280;
+  // theta0 = analogRead(pot)*kP;
   #ifdef DEBUG
     Serial.begin(115200);
   #endif
