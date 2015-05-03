@@ -31,10 +31,10 @@ Mpc = 1/(1/Mc - kP);
 %% series compensator tf (lag)
 
 T = 1e-3;
-tauA = 1/(sqrt(10)*1.65);
-tauB = 10*tauA;
+tauA = 1/8;
+tauB = 1/.3;
 % Kc = 10/(sqrt(10)*3.41);
-Kc = sqrt(10)*db2mag(2.4);
+Kc = sqrt(10)*db2mag(2.4+4+4.5);
 Ktest = Kc*(tauA*s + 1)/(tauB*s + 1)
 K = Ktest;
 eaT = exp(-1/tauA*T)
