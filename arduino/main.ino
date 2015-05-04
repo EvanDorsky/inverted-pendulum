@@ -73,25 +73,29 @@ void Bevent() {
 }
 
 float theta0 = 0;
+volatile int mposk = 0;
 
 void control()
 {
-  posFb = mpos*kPosF; // kPosF determined by matlab
+  mposk = mpos;
+  posFb = mposk*kPosF; // kPosF determined by matlab
   if (pulsetime)
-    mvel = mdir*1.0/((float)(pulsetime*32e-6))*.0022;
+    mvel = mdir*1.0/((float)(pulsetime*32e-6))*0.016;
   thetak = analogRead(pot)*kP - theta0;
 
-  Voutk = Voutk1*.99970004 + 7857.1779*(thetak - .99203191*thetak1) + posFb - .1*mvel;
+  Voutk = Voutk1*.99970004 + 7857.1779*(thetak - .99203191*thetak1) + posFb - .5*mvel;
 
   drivedir = Voutk < 0? BACKWARD : FORWARD;
   // Voutk = Voutk > 12? 12 : Voutk;
 
   thetak1 = thetak;
   Voutk1 = Voutk;
-  mposk1 = mpos;
+  mposk1 = mposk;
 }
 
 void setup() {
+  // reset things
+  mpos = 0;
   // theta0 = 3.26908;
   theta0 = analogRead(pot)*kP;
   #ifdef DEBUG

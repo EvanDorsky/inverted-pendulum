@@ -65,15 +65,25 @@ opts.Title.Interpreter = 'latex';
 clf
 % margin(Ktest)
 % hold on
-bodeplot(Sys, opts)
+bodeplot(-G*Mc, Sys*Ktest, opts)
 h = findobj(gcf, 'type', 'line')
 set(h, 'linewidth', 4);
-title('System with Positive Position Feedback and Lag Compensator')
+title('System Compensation')
+legend('Uncompensated', 'Compensated')
 grid on
 
 figure(2)
 clf
-rlocus(-G*Mpc*K)
+
+h = rlocusplot(-G*Mpc*K)
+
+ropts = getoptions(h)
+ropts.Title.Interpreter = 'latex';
+ropts.Title.Interpreter = 'latex';
+
+setoptions(h, ropts)
+
+title('Compensated System Root Locus Plot')
 
 nopts = nyquistoptions('cstprefs');
 nopts.XLabel.Interpreter = 'latex';
@@ -88,6 +98,6 @@ h = findobj(gcf, 'type', 'line')
 set(h, 'linewidth', 4);
 title('System with Positive Position Feedback and Lag Compensator')
 
-figure(4)
-clf
-pzmap(1/(1+1/Sys))
+% figure(4)
+% clf
+% pzmap(1/(1+1/Sys))

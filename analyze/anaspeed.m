@@ -6,9 +6,16 @@ data = load('data/speedpos.txt');
 Vm = mod(data(:,1), 255)/255*12; % V
 w = abs(data(:,2))*2*pi; % rps
 Im = data(:,3); % A
+time = linspace(0, 6*4, numel(w));
 
 %% Part 1
-% plot(Vm, Im);
+figure(1)
+clf
+plot(time, w)
+xlim([0 20])
+xlabel('Time (seconds)')
+ylabel('Ungeared motor velocity (rps)')
+title('Determining the Motor Electrical Constant')
 
 %% Rm calculation
 % Rm*Im = dv
