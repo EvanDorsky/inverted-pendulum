@@ -45,7 +45,7 @@ volatile float Voutk = 0;
 volatile float Voutk1 = 0;
 volatile int mposk1 = 0;
 
-float posFb = 0.0013;
+float posFb = 0.0;
 
 #define kMotDAC 21.25
 
